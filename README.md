@@ -72,6 +72,15 @@ The filter turns the Feb-2018 and Mar-2020 blow-ups into contained losses — th
 
 ![Bootstrap](docs/assets/robust_bootstrap_sharpe.png)
 
+**Tail risk of short volatility** — both books are negatively skewed and fat-tailed at the *daily* level (irreducible — you're short options):
+
+| Strategy | Skew | Excess kurtosis | ES95 (daily) |
+|----------|:----:|:---------------:|:------------:|
+| Naive short-vol | −1.12 | +9.9 | 1.69% |
+| Gated (crash filter) | −1.55 | +8.1 | 1.74% |
+
+Honest distinction: the filter does **not** fix the single-day tail — it manages the **path**, cutting exposure through multi-day stress clusters to shrink the **drawdown (−18% → −10%)**. Short-vol's daily tail is structural; the drawdown is what you can control.
+
 ## Repository structure
 
 ```

@@ -61,6 +61,12 @@ def main():
     print(f"\n[2] Bootstrap (gated carry, 2000x): Sharpe 90% CI [{lo:+.2f}, {hi:+.2f}], "
           f"median {np.median(sh):+.2f}, P(>0) = {(sh>0).mean():.0%}")
 
+    # [3] tail risk of short vol — skew & kurtosis
+    mn, mg = performance(vol_target(naive)), performance(vol_target(carry))
+    print("\n[3] Tail risk (short vol = picking up pennies in front of a roller):")
+    print(f"    Naive short-vol : skew {mn['skew']:+.2f} | excess kurtosis {mn['kurt']:+.1f} | ES95 {mn['es95']:.2%}")
+    print(f"    Gated (filter)  : skew {mg['skew']:+.2f} | excess kurtosis {mg['kurt']:+.1f} | ES95 {mg['es95']:.2%}")
+
     # crisis bar
     fig, ax = plt.subplots(figsize=(9, 4))
     x = np.arange(len(ct)); w = 0.38
@@ -87,7 +93,18 @@ def main():
           "## Bootstrap confidence", "",
           f"- Gated-carry Sharpe 90% CI **[{lo:+.2f}, {hi:+.2f}]**, median {np.median(sh):+.2f}, "
           f"P(Sharpe>0) = **{(sh>0).mean():.0%}** (block bootstrap, 2000x, 21-day blocks).",
-          "", "![Bootstrap](docs/assets/robust_bootstrap_sharpe.png)"]
+          "", "![Bootstrap](docs/assets/robust_bootstrap_sharpe.png)", "",
+          "## Tail risk of short volatility", "",
+          "Sharpe alone flatters a short-vol book - the risk lives in the left tail. Both books are "
+          "**negatively skewed and fat-tailed at the daily level** (that is irreducible: you are short "
+          "options):", "",
+          "| Strategy | Skew | Excess kurtosis | ES95 (daily) |", "|---|--:|--:|--:|",
+          f"| Naive short-vol | {mn['skew']:+.2f} | {mn['kurt']:+.1f} | {mn['es95']:.2%} |",
+          f"| Gated (crash filter) | {mg['skew']:+.2f} | {mg['kurt']:+.1f} | {mg['es95']:.2%} |",
+          "", "**Honest distinction:** the crash filter does *not* fix the single-day tail - daily skew "
+          "stays around −1 to −1.5. What it manages is the **path**: by cutting exposure through multi-day "
+          "stress clusters it shrinks the **max drawdown (−18% → −10%)** and the crisis losses above. "
+          "Short-vol's daily tail is structural; the *drawdown* is what you can control."]
     (REPORTS / "robustness.md").write_text("\n".join(L), encoding="utf-8")
     print(f"\nReport: {REPORTS / 'robustness.md'}")
     print("=" * 68)
