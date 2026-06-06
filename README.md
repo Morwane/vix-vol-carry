@@ -53,6 +53,25 @@ The catch: short-volatility has **catastrophic tail risk** (Feb-2018 "Volmageddo
 - Short-vol is inherently tail-risky even after gating — position limits and sizing matter live.
 - Research only — **not investment advice**.
 
+## Robustness (`python scripts/run_robustness.py`)
+
+**Crisis stress tests** — does the crash filter protect on the episodes that actually matter? (cumulative return, vol-targeted 10%)
+
+| Episode | Naive short-vol | Gated (crash filter) |
+|---------|:---------------:|:--------------------:|
+| Volmageddon Feb-2018 | −6.6% | **−3.7%** |
+| COVID crash 2020 | −12.6% | **−2.3%** |
+| 2022 selloff | +2.3% | −2.3% |
+| Aug-2024 vol spike | −1.6% | −1.5% |
+
+The filter turns the Feb-2018 and Mar-2020 blow-ups into contained losses — the whole point of the design, shown on the right episodes. (Honest caveat: in the 2022 *grind* — not a vol spike — the filter sat out and gave up a small gain.)
+
+![Crisis](docs/assets/robust_crisis.png)
+
+**Bootstrap** — gated-carry Sharpe 90% CI **[+0.81, +1.65]**, median +1.23, P(Sharpe > 0) = **100%** (block bootstrap, 2000×, 21-day blocks).
+
+![Bootstrap](docs/assets/robust_bootstrap_sharpe.png)
+
 ## Repository structure
 
 ```
