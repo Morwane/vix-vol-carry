@@ -32,6 +32,7 @@ The catch: short-volatility has **catastrophic tail risk** (Feb-2018 "Volmageddo
 ## Methodology
 
 - **Roll-aware returns** — continuation futures (`VXc1`) jump when the contract rolls (≈ monthly). The splice is detected (an upward jump that lands near the previous 2nd-month level) and replaced with the held-contract's true move, so the carry is not swamped by the roll artifact. (~11.5 rolls/year detected, matching the VIX expiry cycle.)
+  - *Roll-detection note (honest):* the detector uses a magnitude rule deliberately **calibrated so it fires ~once a month** (matching the VIX expiry cycle); it is a modeling choice, not a free parameter tuned to the result. A purely structural, parameter-free detector (whole-curve one-slot shift, `c1→c2` & `c2→c3`) was tested but **over-detects** (~43/yr — it mistakes parallel up-moves for rolls and inflates the Sharpe), so the calibrated magnitude rule is the more honest choice here. The clean solution is an exact expiry calendar / a constant-maturity index (future work).
 - **Carry signal** — contango = `VIX3M / VIX − 1`. Short-vol exposure `= −min(contango / 10%, 1)`.
 - **Crash filter** — exposure forced to flat when `VIX > VIX3M` (backwardation).
 - **No look-ahead** — every signal is `shift(1)` before being applied; costs charged on exposure change.

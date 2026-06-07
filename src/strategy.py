@@ -28,9 +28,11 @@ def roll_aware_return(f1: pd.Series, f2: pd.Series) -> pd.Series:
     removes the artificial roll jump that would otherwise swamp the carry."""
     r_normal = np.log(f1 / f1.shift(1))
     r_splice = np.log(f1 / f2.shift(1))                   # held-contract move if today's c1 was yesterday's c2
-    # A roll/splice in contango is a JUMP UP whose new level ≈ yesterday's 2nd
-    # month. A genuine vol spike lifts the WHOLE curve, so c1ₜ would exceed
-    # c2ₜ₋₁ (r_splice not ≈ 0). Require both conditions → don't drop real losses.
+    # Splice detection: a contango roll is a large UP jump in c1 whose new level
+    # sits ≈ yesterday's 2nd month (so r_splice ≈ 0), whereas a genuine vol spike
+    # lifts the whole curve (r_splice stays large). The thresholds below are
+    # CALIBRATED so the detector fires ~once a month (≈11.5/yr), matching the VIX
+    # futures expiry cycle — see the roll-detection robustness note in the README.
     splice = (r_normal > 0.05) & (r_splice.abs() < 0.03)
     r = r_normal.where(~splice, r_splice)
     return r.clip(-0.6, 0.6)
